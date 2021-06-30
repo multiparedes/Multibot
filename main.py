@@ -1,17 +1,22 @@
 from itertools import cycle
 import discord
 from discord.ext import commands, tasks
+from pycoingecko import CoinGeckoAPI
 
 import time
 import random
+import requests
+import json
 
-from discord.message import Message
+from requests.api import request
 
 #Variables globales a usar.
 with open('secret.env', 'r', encoding='utf-8') as secret:
     botToken = secret.read();
 
-client = commands.Bot(command_prefix='$');
+prefix = '$'
+client = commands.Bot(command_prefix=prefix);
+cgUrl = 'https://api.coingecko.com/api/v3'
 
 # <<-- EVENTOS -->> #
 
@@ -27,16 +32,17 @@ async def on_ready():
 async def on_guild_join(servidor):
     for channel in servidor.text_channels:
         if channel.permissions_for(servidor.me).send_messages:
-            await channel.send(f'Hola soy **MultiBot**, encantado de estar en {servidor}!' +
+            await channel.send(f'Hola soy **MultiBot**, encantado de estar en {servidor}! 🤙' +
             '\nEscribe $ayuda o $? para una lista con los comandos actuales.' +
             '\n*~ Bot aún en contrucción, para feedback Multiparedes#1982 <3*');
         break
 
 @client.event
-async def on_message(mem : Message):
-    if(mem.author.id != client.user.id):
-        print(f'El usuario {mem.author.name} ha pedido el comando {mem.content}.')
-        await client.process_commands(mem)
+async def on_message(mem : discord.Message):
+    if(mem.content.startswith(prefix)):
+        if(mem.author.id != client.user.id):
+            print(f'El usuario {mem.author.name} ha pedido el comando {mem.content}.')
+            await client.process_commands(mem)
 
 # <<-- RUTINAS -->> #
 mensajes = cycle(['$ayuda para lista de comandos.','$? para lista de comandos.']);
@@ -53,6 +59,9 @@ async def _ayuda(ctx):
                    '\nping : Devuelve la latencia actual del bot.' +
                    '\nanime : Sugerencia de un anime.' +
                    '\nborrar : Borra el numero especificado de mensajes del canal actual.' +
+                   '\nnuke : Borra todos los mensajes del canal actual.' +
+                   '\ncn : Chistes de Chuck Norris en Ingles.'
+                   '\nprecio : Devuelve el precio de la criptomoneda en euros y dolares.'
                    '\n**Comandos de administrador (rol Admin):**'
                    '\nkick : Expulsa a un usuario del servidor.' +
                    '\nban : Banea a un usuario del servidor.' +
@@ -147,6 +156,43 @@ async def nuke(ctx):
     await ctx.send('1...')
     time.sleep(1)
     await ctx.channel.purge(limit = 2147483647);
+
+#Comando para chiste random de Chuck Norris usando una api 👌
+@client.command()
+async def cn(ctx):
+    url = 'https://api.chucknorris.io/jokes/random'
+
+    raw_response = requests.get(url)
+    json_reponse = json.loads(raw_response.text)
+
+    await ctx.send(json_reponse['value'])
+
+@client.command()
+async def precio(ctx, *, moneda = 'Bitcoin'):
+    parametros = f'?ids={moneda}&vs_currencies=eur%2Cusd'
+
+    incluirCambio24h = True;
+    if(incluirCambio24h):
+        parametros = parametros + f'&include_24hr_change=true'
+
+    precio_raw = requests.get(cgUrl+'/simple/price'+parametros)
+    precio = json.loads(precio_raw.text)
+
+    if(len(precio) == 0):
+        await ctx.send('Moneda no encontrada, debes poner el nombre de la criptomoneda no su simbolo.')
+        return
+
+    mensaje = f"{moneda} esta actualmente a {precio[moneda.lower()]['eur']}€, cambio a dolares: {precio[moneda.lower()]['usd']}$.\n"
+
+    if(incluirCambio24h):
+        if(precio[moneda.lower()]['eur_24h_change'] >= 0):
+            emoji = '👍🏼';
+        else:
+            emoji = '👎🏼';    
+
+        mensaje = mensaje + f"El cambio en las últimas 24h ha sido del {round(precio[moneda.lower()]['eur_24h_change'],2)}% {emoji}. "
+
+    await ctx.send(mensaje)
 
 #Comando para encender el bot.
 client.run(botToken)
