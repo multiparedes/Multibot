@@ -5,6 +5,8 @@ from discord.ext import commands, tasks
 import time
 import random
 
+from discord.message import Message
+
 #Variables globales a usar.
 with open('secret.env', 'r', encoding='utf-8') as secret:
     botToken = secret.read();
@@ -30,6 +32,12 @@ async def on_guild_join(servidor):
             '\n*~ Bot aún en contrucción, para feedback Multiparedes#1982 <3*');
         break
 
+@client.event
+async def on_message(mem : Message):
+    if(mem.author.id != client.user.id):
+        print(f'El usuario {mem.author.name} ha pedido el comando {mem.content}.')
+        await client.process_commands(mem)
+
 # <<-- RUTINAS -->> #
 mensajes = cycle(['$ayuda para lista de comandos.','$? para lista de comandos.']);
 
@@ -48,7 +56,7 @@ async def _ayuda(ctx):
                    '\n**Comandos de administrador (rol Admin):**'
                    '\nkick : Expulsa a un usuario del servidor.' +
                    '\nban : Banea a un usuario del servidor.' +
-                   '\nunban : Desbanea a un usuario del servidor.')
+                   '\nunban : Desbanea a un usuario del servidor.')              
 
 #Comando para ver si el bot esta activo y la latencia del mismo.
 @client.command()
