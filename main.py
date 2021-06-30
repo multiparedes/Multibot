@@ -1,17 +1,15 @@
-from asyncio.tasks import as_completed
 from itertools import cycle
 import discord
 from discord.ext import commands, tasks
 
 import time
 import random
-from dotenv import load_dotenv
-import os
 
 #Variables globales a usar.
+with open('secret.env', 'r', encoding='utf-8') as secret:
+    botToken = secret.read();
+
 client = commands.Bot(command_prefix='$');
-load_dotenv('.env')
-tokenBot = os.getenv('botToken')
 
 # <<-- EVENTOS -->> #
 
@@ -143,4 +141,4 @@ async def nuke(ctx):
     await ctx.channel.purge(limit = 2147483647);
 
 #Comando para encender el bot.
-client.run(tokenBot)
+client.run(botToken)
