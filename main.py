@@ -1,5 +1,6 @@
 from itertools import cycle
 import discord
+from discord import embeds
 from discord.ext import commands, tasks
 
 import time
@@ -14,6 +15,7 @@ with open('secret.env', 'r', encoding='utf-8') as secret:
 prefix = '$'
 client = commands.Bot(command_prefix=prefix);
 cgUrl = 'https://api.coingecko.com/api/v3'
+cnUrl = 'https://api.chucknorris.io/jokes/random'
 
 # <<-- EVENTOS -->> #
 
@@ -157,16 +159,15 @@ async def nuke(ctx):
 #Comando para chiste random de Chuck Norris usando una api 👌
 @client.command()
 async def cn(ctx):
-    url = 'https://api.chucknorris.io/jokes/random'
-
-    raw_response = requests.get(url)
+    raw_response = requests.get(cnUrl)
     json_reponse = json.loads(raw_response.text)
 
     await ctx.send(json_reponse['value'])
 
-@client.command()
-async def precio(ctx, *, moneda = 'Bitcoin'):
+@client.command(aliases = ['precio','price'])
+async def _precio(ctx, moneda = 'Bitcoin'):
     parametros = f'?ids={moneda}&vs_currencies=eur%2Cusd'
+    urlCG = f'https://www.coingecko.com/es/monedas/{moneda.lower()}'
 
     incluirCambio24h = True;
     if(incluirCambio24h):
@@ -179,17 +180,23 @@ async def precio(ctx, *, moneda = 'Bitcoin'):
         await ctx.send('Moneda no encontrada, debes poner el nombre de la criptomoneda no su simbolo.')
         return
 
-    mensaje = f"{moneda} esta actualmente a {precio[moneda.lower()]['eur']}€, cambio a dolares: {precio[moneda.lower()]['usd']}$.\n"
+    mensaje = discord.Embed(title = f"Precio actual de {moneda}")
 
+    mensaje.description = f"Precio actual en euros : {precio[moneda.lower()]['eur']}€.\nPrecio actual en dolares : {precio[moneda.lower()]['eur']}$"  
+    
     if(incluirCambio24h):
         if(precio[moneda.lower()]['eur_24h_change'] >= 0):
             emoji = '👍🏼';
+            mensaje.color = discord.Color.green();
         else:
-            emoji = '👎🏼';    
+            emoji = '👎🏼';                
+            mensaje.color = discord.Color.red();
 
-        mensaje = mensaje + f"El cambio en las últimas 24h ha sido del {round(precio[moneda.lower()]['eur_24h_change'],2)}% {emoji}. "
+        mensaje.add_field(name = 'Cambio últimas 24h:',value = f"El cambio en las últimas 24h ha sido del {round(precio[moneda.lower()]['eur_24h_change'],2)}% {emoji}.")
 
-    await ctx.send(mensaje)
+    mensaje.set_footer(text = f'{urlCG}')
+
+    await ctx.send(embed = mensaje)
 
 #Comando para encender el bot.
 client.run(botToken)
