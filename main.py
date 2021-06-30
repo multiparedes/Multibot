@@ -5,11 +5,13 @@ from discord.ext import commands, tasks
 
 import time
 import random
-import requests
-import json
+from dotenv import load_dotenv
+import os
 
 #Variables globales a usar.
 client = commands.Bot(command_prefix='$');
+load_dotenv('.env')
+tokenBot = os.getenv('botToken')
 
 # <<-- EVENTOS -->> #
 
@@ -141,4 +143,4 @@ async def nuke(ctx):
     await ctx.channel.purge(limit = 2147483647);
 
 #Comando para encender el bot.
-client.run('ODU5MzY0MzU1OTc5NjA4MDY0.YNrnbA.BLVtoKYapRDhoCUFe7Q_h4PanyA')
+client.run(tokenBot)
