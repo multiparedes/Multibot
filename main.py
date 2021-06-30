@@ -7,8 +7,6 @@ import random
 import requests
 import json
 
-from requests.api import request
-
 #Variables globales a usar.
 with open('secret.env', 'r', encoding='utf-8') as secret:
     botToken = secret.read();
