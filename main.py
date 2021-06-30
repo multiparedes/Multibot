@@ -1,7 +1,6 @@
 from itertools import cycle
 import discord
 from discord.ext import commands, tasks
-from pycoingecko import CoinGeckoAPI
 
 import time
 import random
