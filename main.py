@@ -27,6 +27,7 @@ async def on_ready():
 #Mensaje de bienvenida del bot a un servidor.
 @client.event
 async def on_guild_join(servidor):
+    print(f'{client.user.name} ha sido añadido a {servidor}.')
     for channel in servidor.text_channels:
         if channel.permissions_for(servidor.me).send_messages:
             await channel.send(f'Hola soy **MultiBot**, encantado de estar en {servidor}! 🤙' +
@@ -63,7 +64,7 @@ async def _ayuda(ctx):
                         \u200bborrar : Borra el numero especificado de mensajes del canal actual.
                         \u200bnuke : Borra todos los mensajes del canal actual.
                         \u200bnick : Comando para poner un nick a algun usuario.
-                        \u200bunnick : Comando para poner quitar el nick a algun usuario.                        
+                        \u200bunnick : Comando para quitar el nick a algun usuario.                        
                         \u200bprecio : Devuelve el precio de la criptomoneda en euros y dolares.'''
 
     mensaje_ayuda.add_field(name = 'Comandos varios', value = contenido_vario, inline= False)
@@ -98,6 +99,10 @@ async def borrar_error(ctx, error):
 @client.command()
 async def nuke(ctx):
 
+    msg = await ctx.send('Estas seguro de que quieres borrar TODOS los mensajes de este canal?')
+    await msg.add_reaction('✔')
+    await msg.add_reaction('❌')
+
     await ctx.send('NUKE EN 3 ...');
     time.sleep(1)
     await ctx.send('2...')    
@@ -112,6 +117,11 @@ async def nick(ctx, usuario : discord.Member, *,nuevo_nombre):
     await ctx.send(f"{usuario.display_name.capitalize()} ha sido bendecido como '**{nuevo_nombre}**'.")
     await usuario.edit(nick = nuevo_nombre)
 
+@nick.error
+async def nick_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Debes introducir el nombre del usuario y el nick.\nEjemplo: *$nick @multiparedes rastaman*')
+
 #Comando para quitar un nick a algun usuario (en caso de tener alguno).
 @client.command()
 async def unnick(ctx, usuario: discord.Member):
@@ -121,6 +131,11 @@ async def unnick(ctx, usuario: discord.Member):
 
     await ctx.send(f'{usuario.display_name.capitalize()} ha recuperado su nombre original.')    
     await usuario.edit(nick = usuario.name)
+
+@unnick.error
+async def unnick_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Debes introducir el nombre del usuario a quitar el nick.\nEjemplo: *$unnick @multiparedes*')
 
 #Comando ponde dado una criptomoneda te devuelve el precio y el cambio 24h.
 @client.command(aliases = ['precio','price'])
@@ -170,7 +185,7 @@ async def kick(ctx, usuario : discord.Member, *, razon = 'Sin especificar.'):
 @kick.error
 async def kick_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Debes introducir el nombre del usuario a expulsar.\nEjemplo: *$kick multiparedes*')
+        await ctx.send('Debes introducir el nombre del usuario a expulsar.\nEjemplo: *$kick @multiparedes*')
         return
 
 #Comando para banear a alguien de un servidor.
@@ -184,7 +199,7 @@ async def ban(ctx, usuario : discord.Member, *, razon = 'Sin especificar.'):
 @ban.error
 async def ban_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send('Debes introducir el nombre del usuario a banear.\nEjemplo: *$ban multiparedes*')
+        await ctx.send('Debes introducir el nombre del usuario a banear.\nEjemplo: *$ban @multiparedes*')
         return
 
 #Comando para desbanear a alguien de un servidor.
