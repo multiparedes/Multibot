@@ -1,10 +1,8 @@
 from itertools import cycle
 import discord
-from discord import embeds
 from discord.ext import commands, tasks
 
 import time
-import random
 import requests
 import json
 
@@ -36,6 +34,7 @@ async def on_guild_join(servidor):
             '\n*~ Bot aún en contrucción, para feedback Multiparedes#1982 <3*');
         break
 
+#Muestra por consola los comandos que se le piden al bot.
 @client.event
 async def on_message(mem : discord.Message):
     if(mem.content.startswith(prefix)):
@@ -46,38 +45,43 @@ async def on_message(mem : discord.Message):
 # <<-- RUTINAS -->> #
 mensajes = cycle(['$ayuda para lista de comandos.','$? para lista de comandos.']);
 
+#Rutina para cambiar el estado del bot.
 @tasks.loop(seconds = 30)
 async def cambiarEstado():
     await client.change_presence(activity = discord.Game(next(mensajes)));
 
 # <<-- COMANDOS -->> #
 
+#Comando de ayuda.
 @client.command(aliases = ['ayuda','?'])
 async def _ayuda(ctx):
-    await ctx.send('**Lista de comandos actuales:**'+
-                   '\nping : Devuelve la latencia actual del bot.' +
-                   '\nanime : Sugerencia de un anime.' +
-                   '\nborrar : Borra el numero especificado de mensajes del canal actual.' +
-                   '\nnuke : Borra todos los mensajes del canal actual.' +
-                   '\ncn : Chistes de Chuck Norris en Ingles.'
-                   '\nprecio : Devuelve el precio de la criptomoneda en euros y dolares.'
-                   '\n**Comandos de administrador (rol Admin):**'
-                   '\nkick : Expulsa a un usuario del servidor.' +
-                   '\nban : Banea a un usuario del servidor.' +
-                   '\nunban : Desbanea a un usuario del servidor.')              
+     
+    mensaje_ayuda = discord.Embed(title = 'Lista de comandos actuales :', color = discord.Color.teal());             
+    
+    contenido_vario = '''ayuda : Muestra este mensaje.
+                        \u200bping : Devuelve la latencia actual del bot.
+                        \u200bborrar : Borra el numero especificado de mensajes del canal actual.
+                        \u200bnuke : Borra todos los mensajes del canal actual.
+                        \u200bnick : Comando para poner un nick a algun usuario.
+                        \u200bunnick : Comando para poner quitar el nick a algun usuario.                        
+                        \u200bprecio : Devuelve el precio de la criptomoneda en euros y dolares.'''
 
+    mensaje_ayuda.add_field(name = 'Comandos varios', value = contenido_vario, inline= False)
+
+    contenido_admin = '''kick : Expulsa a un usuario del servidor.
+                        \u200bban : Banea a un usuario del servidor.
+                        \u200bunban : Desbanea a un usuario del servidor.'''
+
+    mensaje_ayuda.add_field(name = 'Comandos de administrador (necesario rol Admin)', value = contenido_admin, inline= False)                    
+    mensaje_ayuda.add_field(name = f'Nota: Para todos los comandos necesitas poner el prefijo {prefix} delante.', value = '*[Link al codigo fuente del bot.](https://github.com/multiparedes/cositasBot)*', inline= False)
+    mensaje_ayuda.set_footer(text = '~ Bot aún en contrucción, para feedback Multiparedes#1982 <3')
+
+    await ctx.send(embed = mensaje_ayuda)
+    
 #Comando para ver si el bot esta activo y la latencia del mismo.
 @client.command()
 async def ping(ctx):
-    await ctx.send(f'Pong! {round(client.latency*1000)}ms');
-
-#Comando que devuelve un anime random de una lista.
-@client.command()
-async def anime(ctx):
-    lista_animes = ['Naruto','Naruto Shippuden','Boruto','Hunter X Hunter'
-                    ,'One Piece','Demon Slayer','Black Clover','Bleach'];
-                 
-    await ctx.send(f'Te recomiendo el anime: *{random.choice(lista_animes)}*.')             
+    await ctx.send(f'Pong! {round(client.latency*1000)}ms');          
 
 #Comando para borrar mensajes de un canal.
 @client.command()
@@ -90,6 +94,71 @@ async def borrar_error(ctx, error):
         await ctx.send('Debes introducir el número de mensajes a borrar.\nEjemplo: *$borrar 20*')
         return
     
+#Comando para borrar un canal entero.
+@client.command()
+async def nuke(ctx):
+
+    await ctx.send('NUKE EN 3 ...');
+    time.sleep(1)
+    await ctx.send('2...')    
+    time.sleep(1)
+    await ctx.send('1...')
+    time.sleep(1)
+    await ctx.channel.purge(limit = 2147483647);
+
+#Comando para poner un nick a algun usuario.
+@client.command()
+async def nick(ctx, usuario : discord.Member, *,nuevo_nombre):
+    await ctx.send(f"{usuario.display_name.capitalize()} ha sido bendecido como '**{nuevo_nombre}**'.")
+    await usuario.edit(nick = nuevo_nombre)
+
+#Comando para quitar un nick a algun usuario (en caso de tener alguno).
+@client.command()
+async def unnick(ctx, usuario: discord.Member):
+    if(usuario.display_name == usuario.name):
+        await ctx.send(f'{usuario.display_name.capitalize()} no posee ningún nick.')
+        return
+
+    await ctx.send(f'{usuario.display_name.capitalize()} ha recuperado su nombre original.')    
+    await usuario.edit(nick = usuario.name)
+
+#Comando ponde dado una criptomoneda te devuelve el precio y el cambio 24h.
+@client.command(aliases = ['precio','price'])
+async def _precio(ctx, moneda = 'Bitcoin'):
+    parametros = f'?ids={moneda}&vs_currencies=eur%2Cusd'
+    urlCG = f'https://www.coingecko.com/es/monedas/{moneda.lower()}'
+
+    incluirCambio24h = True;
+    if(incluirCambio24h):
+        parametros = parametros + f'&include_24hr_change=true'
+
+    precio_raw = requests.get(cgUrl+'/simple/price'+parametros)
+    precio = json.loads(precio_raw.text)
+
+    if(len(precio) == 0):
+        await ctx.send('Moneda no encontrada, debes poner el nombre de la criptomoneda no su simbolo.')
+        return
+
+    mensaje_precio = discord.Embed(title = f"Precio actual de {moneda.capitalize()}")
+
+    mensaje_precio.description = f"Precio actual en euros : {precio[moneda.lower()]['eur']}€.\nPrecio actual en dolares : {precio[moneda.lower()]['eur']}$"  
+    
+    if(incluirCambio24h):
+        if(precio[moneda.lower()]['eur_24h_change'] >= 0):
+            emoji = '👍🏼';
+            mensaje_precio.color = discord.Color.green();
+        else:
+            emoji = '👎🏼';                
+            mensaje_precio.color = discord.Color.red();
+
+        mensaje_precio.add_field(name = 'Cambio últimas 24h:',value = f"El cambio en las últimas 24h ha sido del {round(precio[moneda.lower()]['eur_24h_change'],2)}% {emoji}.")
+
+    mensaje_precio.set_footer(text = f'{urlCG}', icon_url = 'https://static.coingecko.com/s/thumbnail-007177f3eca19695592f0b8b0eabbdae282b54154e1be912285c9034ea6cbaf2.png')
+
+    await ctx.send(embed = mensaje_precio)
+
+# <<-- COMANDOS DE ADMIN -->>
+
 #Comando para expulsar a alguien de un servidor.
 @client.command()
 @commands.has_role('Admin')
@@ -143,60 +212,6 @@ async def unban_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('Debes introducir el nombre del usuario a desbanear.\nEjemplo: *$unban multiparedes*')
         return
-
-#Comando para borrar un canal entero.
-@client.command()
-async def nuke(ctx):
-
-    await ctx.send('NUKE EN 3 ...');
-    time.sleep(1)
-    await ctx.send('2...')    
-    time.sleep(1)
-    await ctx.send('1...')
-    time.sleep(1)
-    await ctx.channel.purge(limit = 2147483647);
-
-#Comando para chiste random de Chuck Norris usando una api 👌
-@client.command()
-async def cn(ctx):
-    raw_response = requests.get(cnUrl)
-    json_reponse = json.loads(raw_response.text)
-
-    await ctx.send(json_reponse['value'])
-
-@client.command(aliases = ['precio','price'])
-async def _precio(ctx, moneda = 'Bitcoin'):
-    parametros = f'?ids={moneda}&vs_currencies=eur%2Cusd'
-    urlCG = f'https://www.coingecko.com/es/monedas/{moneda.lower()}'
-
-    incluirCambio24h = True;
-    if(incluirCambio24h):
-        parametros = parametros + f'&include_24hr_change=true'
-
-    precio_raw = requests.get(cgUrl+'/simple/price'+parametros)
-    precio = json.loads(precio_raw.text)
-
-    if(len(precio) == 0):
-        await ctx.send('Moneda no encontrada, debes poner el nombre de la criptomoneda no su simbolo.')
-        return
-
-    mensaje = discord.Embed(title = f"Precio actual de {moneda}")
-
-    mensaje.description = f"Precio actual en euros : {precio[moneda.lower()]['eur']}€.\nPrecio actual en dolares : {precio[moneda.lower()]['eur']}$"  
-    
-    if(incluirCambio24h):
-        if(precio[moneda.lower()]['eur_24h_change'] >= 0):
-            emoji = '👍🏼';
-            mensaje.color = discord.Color.green();
-        else:
-            emoji = '👎🏼';                
-            mensaje.color = discord.Color.red();
-
-        mensaje.add_field(name = 'Cambio últimas 24h:',value = f"El cambio en las últimas 24h ha sido del {round(precio[moneda.lower()]['eur_24h_change'],2)}% {emoji}.")
-
-    mensaje.set_footer(text = f'{urlCG}')
-
-    await ctx.send(embed = mensaje)
 
 #Comando para encender el bot.
 client.run(botToken)
