@@ -74,7 +74,7 @@ async def _ayuda(ctx):
                         \u200bunban : Desbanea a un usuario del servidor.'''
 
     mensaje_ayuda.add_field(name = 'Comandos de administrador (necesario rol Admin)', value = contenido_admin, inline= False)                    
-    mensaje_ayuda.add_field(name = f'Nota: Para todos los comandos necesitas poner el prefijo {prefix} delante.', value = '*[Link al codigo fuente del bot.](https://github.com/multiparedes/cositasBot)*', inline= False)
+    mensaje_ayuda.add_field(name = f'Nota: Para todos los comandos necesitas poner el prefijo {prefix} delante.', value = '*[Link al codigo fuente del bot.](https://github.com/multiparedes/Multibot)*', inline= False)
     mensaje_ayuda.set_footer(text = '~ Bot aún en contrucción, para feedback Multiparedes#1982 <3')
 
     await ctx.send(embed = mensaje_ayuda)
