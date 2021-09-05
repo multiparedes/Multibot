@@ -31,16 +31,16 @@ Una vez todo está instalado y los requisitos cumplidos simplemente ejecuta el a
 ***Comandos varios**:*
 - ayuda : Muestra este mensaje.
 - ​ping : Devuelve la latencia actual del bot.
-​- borrar : Borra el número especificado de mensajes del canal actual.
+- borrar : Borra el número especificado de mensajes del canal actual.
 - ​nuke : Borra todos los mensajes del canal actual.
-​- nick : Comando para poner un nick a algún usuario.
-​- unnick : Comando para poner quitar el nick a algún usuario.
-​- precio : Devuelve el precio de la criptomoneda en euros y dólares.
+- nick : Comando para poner un nick a algún usuario.
+- unnick : Comando para poner quitar el nick a algún usuario.
+- precio : Devuelve el precio de la criptomoneda en euros y dólares.
 
 ***Comandos de administrador** (necesario rol Admin):*
 - kick : Expulsa a un usuario del servidor.
-​- ban : Banea a un usuario del servidor.
-​- unban : Desbanea a un usuario del servidor.
+- ban : Banea a un usuario del servidor.
+- unban : Desbanea a un usuario del servidor.
 
 Más comandos y funcionalidades están por venir. 
 
