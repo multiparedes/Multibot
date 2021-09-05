@@ -5,15 +5,11 @@ Multibot es un bot simple de [Discord](discord.com) con algunas funcionalidades.
 ⚠️ **ATENCIÓN**  : Esta no es una versión definitiva, me gustaría seguir aumentando las funcionalidades a medida que aprendo más.
 
 ---
-
-<!-- TOC -->
-
+**Contenidos :**
 - [**Multibot, un bot de Discord escrito en python. 🐍**](#multibot-un-bot-de-discord-escrito-en-python-)
-        - [**1. Añadir Multibot a un servidor 🤖**](#1-añadir-multibot-a-un-servidor-)
-        - [**2. Instalar Multibot en tu ordenador ⚙️**](#2-instalar-multibot-en-tu-ordenador-)
-        - [**3. Lista de comandos disponibles. 📔**](#3-lista-de-comandos-disponibles-)
-
-<!-- /TOC -->
+    - [**1. Añadir Multibot a un servidor 🤖**](#1-aadir-multibot-a-un-servidor-)
+    - [**2. Instalar Multibot en tu ordenador ⚙️**](#2-instalar-multibot-en-tu-ordenador-)
+    - [**3. Lista de comandos disponibles. 📔**](#3-lista-de-comandos-disponibles-)
 
 ---
 
